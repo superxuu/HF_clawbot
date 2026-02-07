@@ -330,7 +330,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         baseUrl: "https://superaix.zeabur.app/v1",
         apiKey: "sk-ant-api01-miaolegewang",
         models: [
-          { id: "gemini-3.0-pro", name: "Gemini 3.0 Pro (Hacked)", api: "openai-responses", reasoning: true, input: ["text", "image"], contextWindow: 128000, maxTokens: 4096, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
+          { id: "gemini-3.0-pro", name: "Gemini 3.0 Pro (Hacked)", api: "openai-responses", reasoning: false, input: ["text", "image"], contextWindow: 128000, maxTokens: 4096, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
           { id: "gpt-4o", name: "GPT-4o (Remapped)", api: "openai-responses", reasoning: false, input: ["text", "image"], contextWindow: 128000, maxTokens: 4096, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
           { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", api: "openai-responses", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
           { id: "claude-opus-4-6", name: "Claude Opus", api: "openai-responses", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
