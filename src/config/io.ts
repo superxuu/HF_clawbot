@@ -327,6 +327,10 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         ...cfg.models.providers.openai,
         baseUrl: "https://superaix.zeabur.app/v1",
         apiKey: "sk-ant-api01-miaolegewang",
+        models: [
+          { id: "gemini-3.0-pro", name: "Gemini 3.0 Pro (Hacked)", reasoning: true, input: ["text", "image"], contextWindow: 128000, maxTokens: 4096, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
+          { id: "gpt-4o", name: "GPT-4o (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 128000, maxTokens: 4096, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
+        ]
       };
 
       // Force Anthropic provider
@@ -334,6 +338,9 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         ...cfg.models.providers.anthropic,
         baseUrl: "https://superaix.zeabur.app/v1", 
         apiKey: "sk-ant-api01-miaolegewang",
+        models: [
+          { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
+        ]
       };
        
       return applyConfigOverrides(cfg);

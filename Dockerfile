@@ -1,47 +1,43 @@
-# Use Node.js 22 as the base image
+# 使用 Node.js 22 作为基础镜像
 FROM node:22-bullseye
 
-# Install corepack for pnpm support
+# 安装必要的系统工具 (git, openssh)
+RUN apt-get update && apt-get install -y git openssh-client && rm -rf /var/lib/apt/lists/*
+
+# 启用核心包管理 (pnpm)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Set working directory
+# 设置工作目录
 WORKDIR /app
 
-# Copy dependency definitions
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-# Copy patches if they exist (ignoring if not present effectively, but COPY fails if not found unless we use wildcard)
-# We know patches dir exists from `list_dir`
-COPY patches ./patches
+# 注意：Hugging Face Space 会自动将当前仓库代码放在构建上下文中。
+# 如果你想从特定仓库拉取最新代码，可以使用下面的命令：
+# 注意：如果仓库是私有的，需要通过环境变量传入 token。
+RUN git clone https://github.com/superxuu/HF_clawbot.git .
 
-# Install dependencies (frozen lockfile for reproducibility)
-RUN pnpm install --frozen-lockfile
+# 安装依赖
+# 由于是克隆的全新仓库，我们需要安装依赖
+RUN pnpm install --no-frozen-lockfile
 
-# Copy the rest of the application source code
-COPY . .
-
-# Build the project
-# This includes compiling TypeScript and other assets
+# 构建项目 (编译 TypeScript 等)
 RUN pnpm build
 
-# Build the UI
-# This ensures the frontend assets are available
+# 构建前端 UI
 RUN pnpm ui:build
 
-# Fix permissions for the node user
-RUN chown -R node:node /app
+# 修正目录权限 (HF Space 使用 user 1000)
+RUN chown -R 1000:1000 /app
 
-# Switch to non-root user for security
-USER node
+# 切换到非 root 用户
+USER 1000
 
-# Expose the port (7860 is standard for HF Spaces)
+# 暴露端口 (HF Space 要求 7860)
 EXPOSE 7860
 
-# Set environment variables
+# 环境变量设置
 ENV NODE_ENV=production
-# Default port if not provided by HF
 ENV PORT=7860
 
-# Start the application
-# We use shell form to ensure the PORT environment variable is correctly mapped 
-# to OPENCLAW_GATEWAY_PORT, which the application uses.
+# 启动应用程序
+# 显式映射 PORT 到 OpenClaw 使用的 OPENCLAW_GATEWAY_PORT
 CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs"]
