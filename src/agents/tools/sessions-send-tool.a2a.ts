@@ -28,8 +28,10 @@ export async function runSessionsSendA2AFlow(params: {
 }) {
   const runContextId = params.waitRunId ?? "unknown";
   try {
-    let primaryReply = params.roundOneReply;
-    let latestReply = params.roundOneReply;
+    let primaryReply: { text: string; attachments: any[] } | undefined = params.roundOneReply 
+      ? { text: params.roundOneReply, attachments: [] } 
+      : undefined;
+    let latestReply: { text: string; attachments: any[] } | undefined = primaryReply;
     if (!primaryReply && params.waitRunId) {
       const waitMs = Math.min(params.announceTimeoutMs, 60_000);
       const wait = await callGateway<{ status: string }>({
@@ -77,18 +79,18 @@ export async function runSessionsSendA2AFlow(params: {
           turn,
           maxTurns: params.maxPingPongTurns,
         });
-        const replyText = await runAgentStep({
+        const replyResult = await runAgentStep({
           sessionKey: currentSessionKey,
-          message: incomingMessage,
+          message: incomingMessage.text,
           extraSystemPrompt: replyPrompt,
           timeoutMs: params.announceTimeoutMs,
           lane: AGENT_LANE_NESTED,
         });
-        if (!replyText || isReplySkip(replyText)) {
+        if (!replyResult || !replyResult.text || isReplySkip(replyResult.text)) {
           break;
         }
-        latestReply = replyText;
-        incomingMessage = replyText;
+        latestReply = replyResult;
+        incomingMessage = replyResult;
         const swap = currentSessionKey;
         currentSessionKey = nextSessionKey;
         nextSessionKey = swap;
@@ -101,23 +103,24 @@ export async function runSessionsSendA2AFlow(params: {
       targetSessionKey: params.displayKey,
       targetChannel,
       originalMessage: params.message,
-      roundOneReply: primaryReply,
-      latestReply,
+      roundOneReply: primaryReply?.text,
+      latestReply: latestReply.text,
     });
-    const announceReply = await runAgentStep({
+    const announceResult = await runAgentStep({
       sessionKey: params.targetSessionKey,
       message: "Agent-to-agent announce step.",
       extraSystemPrompt: announcePrompt,
       timeoutMs: params.announceTimeoutMs,
       lane: AGENT_LANE_NESTED,
     });
-    if (announceTarget && announceReply && announceReply.trim() && !isAnnounceSkip(announceReply)) {
+    if (announceTarget && announceResult && announceResult.text.trim() && !isAnnounceSkip(announceResult.text)) {
       try {
         await callGateway({
           method: "send",
           params: {
             to: announceTarget.to,
-            message: announceReply.trim(),
+            message: announceResult.text.trim(),
+            attachments: announceResult.attachments,
             channel: announceTarget.channel,
             accountId: announceTarget.accountId,
             idempotencyKey: crypto.randomUUID(),
