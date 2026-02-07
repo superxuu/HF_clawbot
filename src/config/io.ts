@@ -346,7 +346,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       // [Hardcode] Add Allowed Origins for HF Space CORS compatibility
       if (!cfg.gateway) cfg.gateway = {};
       if (!cfg.gateway.controlUi) cfg.gateway.controlUi = { enabled: true };
-      cfg.gateway.controlUi.allowedOrigins = ["*"];
+      cfg.gateway.controlUi.allowedOrigins = ["*"]; // Corrected path
       cfg.gateway.mode = "local"; // Ensure local mode to matching the isLocalDirectRequest bypass
        
       return applyConfigOverrides(cfg);
