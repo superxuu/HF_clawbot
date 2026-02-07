@@ -90,14 +90,14 @@ export function isIpInCidr(ip: string, cidr: string): boolean {
     }
 
     const ipInt =
-      ((ipParts[0] << 24) >>> 0) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3];
+      ((ipParts[0] << 24) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3]) >>> 0;
     const rangeInt =
-      ((rangeParts[0] << 24) >>> 0) | (rangeParts[1] << 16) | (rangeParts[2] << 8) | rangeParts[3];
+      ((rangeParts[0] << 24) | (rangeParts[1] << 16) | (rangeParts[2] << 8) | rangeParts[3]) >>> 0;
 
     if (bits === 0) {
       return true;
     }
-    const mask = bits === 32 ? 0xffffffff : (~((1 << (32 - bits)) - 1)) >>> 0;
+    const mask = (bits === 32 ? 0xffffffff : ~((1 << (32 - bits)) - 1)) >>> 0;
     return (ipInt & mask) === (rangeInt & mask);
   } catch {
     return false;
