@@ -142,6 +142,11 @@ export function handleMessageUpdate(
       shouldEmit = Boolean(deltaText || hasMedia || hasAudio);
     }
 
+    const cumulativeText =
+      ctx.state.assistantTexts.length > 0
+        ? `${ctx.state.assistantTexts.join("\n\n")}\n\n${cleanedText}`
+        : cleanedText;
+
     ctx.state.lastStreamedAssistant = next;
     ctx.state.lastStreamedAssistantCleaned = cleanedText;
 
@@ -150,7 +155,7 @@ export function handleMessageUpdate(
         runId: ctx.params.runId,
         stream: "assistant",
         data: {
-          text: cleanedText,
+          text: cumulativeText,
           delta: deltaText,
           mediaUrls: hasMedia ? mediaUrls : undefined,
         },
@@ -158,7 +163,7 @@ export function handleMessageUpdate(
       void ctx.params.onAgentEvent?.({
         stream: "assistant",
         data: {
-          text: cleanedText,
+          text: cumulativeText,
           delta: deltaText,
           mediaUrls: hasMedia ? mediaUrls : undefined,
         },
@@ -235,11 +240,15 @@ export function handleMessageEnd(
   }
 
   if (!ctx.state.emittedAssistantUpdate && (cleanedText || hasMedia)) {
+    const cumulativeText =
+      ctx.state.assistantTexts.length > 0
+        ? `${ctx.state.assistantTexts.join("\n\n")}\n\n${cleanedText}`
+        : cleanedText;
     emitAgentEvent({
       runId: ctx.params.runId,
       stream: "assistant",
       data: {
-        text: cleanedText,
+        text: cumulativeText,
         delta: cleanedText,
         mediaUrls: hasMedia ? mediaUrls : undefined,
       },
@@ -247,7 +256,7 @@ export function handleMessageEnd(
     void ctx.params.onAgentEvent?.({
       stream: "assistant",
       data: {
-        text: cleanedText,
+        text: cumulativeText,
         delta: cleanedText,
         mediaUrls: hasMedia ? mediaUrls : undefined,
       },

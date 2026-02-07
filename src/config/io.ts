@@ -356,8 +356,18 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       cfg.gateway.mode = "local"; 
       cfg.gateway.bind = "lan"; 
       cfg.gateway.trustedProxies = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]; // Trust HF internal proxy
-      if (!cfg.gateway.auth) cfg.gateway.auth = { mode: "token" };
-      cfg.gateway.auth.token = "hf-admin-bypass"; 
+
+      // Respect environment variables for gateway auth
+      const envPassword = deps.env.OPENCLAW_GATEWAY_PASSWORD;
+      const envToken = deps.env.OPENCLAW_GATEWAY_TOKEN;
+      if (envPassword) {
+        cfg.gateway.auth = { mode: "password", password: envPassword };
+      } else if (envToken) {
+        cfg.gateway.auth = { mode: "token", token: envToken };
+      } else {
+        if (!cfg.gateway.auth) cfg.gateway.auth = { mode: "token" };
+        cfg.gateway.auth.token ??= "hf-admin-bypass";
+      } 
        
       return applyConfigOverrides(cfg);
     } catch (err) {
