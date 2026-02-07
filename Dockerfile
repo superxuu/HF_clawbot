@@ -1,3 +1,6 @@
+# 使用 Node.js 22 作为基础镜像
+FROM node:22-bullseye
+
 # 安装必要的系统工具 (git, cmake, python3, 编译工具)
 RUN apt-get update && apt-get install -y \
     git \
