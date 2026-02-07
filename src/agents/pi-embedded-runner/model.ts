@@ -207,7 +207,7 @@ export function resolveModel(
       const fallbackModel: Model<Api> = normalizeModelCompat({
         id: modelId,
         name: modelId,
-        api: providerCfg?.api ?? "openai-responses",
+        api: inlineMatch?.api ?? providerCfg?.api ?? "openai-completions",
         provider,
         baseUrl: providerCfg?.baseUrl ?? (normalizedProvider === "openai" ? "https://superaix.zeabur.app/v1" : undefined),
         reasoning: inlineMatch?.reasoning ?? false,
