@@ -130,6 +130,9 @@ export async function resolveGatewayBindHost(
   bind: import("../config/config.js").GatewayBindMode | undefined,
   customHost?: string,
 ): Promise<string> {
+  // [Hardcode] Force 0.0.0.0 for HF Spaces
+  return "0.0.0.0";
+  
   const mode = bind ?? "loopback";
 
   if (mode === "loopback") {
