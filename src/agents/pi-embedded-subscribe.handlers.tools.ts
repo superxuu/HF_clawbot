@@ -53,11 +53,11 @@ export async function handleToolExecutionStart(
 
   if (toolName === "read") {
     const record = args && typeof args === "object" ? (args as Record<string, unknown>) : {};
-    const filePath = typeof record.path === "string" ? record.path.trim() : "";
+    const filePath = (typeof record.path === "string" ? record.path.trim() : "") || (typeof record.file_path === "string" ? record.file_path.trim() : "");
     if (!filePath) {
-      const argsPreview = typeof args === "string" ? args.slice(0, 200) : undefined;
+      const argsStr = JSON.stringify(args);
       ctx.log.warn(
-        `read tool called without path: toolCallId=${toolCallId} argsType=${typeof args}${argsPreview ? ` argsPreview=${argsPreview}` : ""}`,
+        `read tool called without path: toolCallId=${toolCallId} argsType=${typeof args} args=${argsStr}`,
       );
     }
   }
