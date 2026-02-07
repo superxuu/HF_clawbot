@@ -391,3 +391,35 @@ export function extractAssistantText(message: unknown): string | undefined {
   const joined = chunks.join("").trim();
   return joined ? sanitizeUserFacingText(joined) : undefined;
 }
+
+export function extractAssistantAttachments(message: unknown): any[] {
+  if (!message || typeof message !== "object") {
+    return [];
+  }
+  if ((message as { role?: unknown }).role !== "assistant") {
+    return [];
+  }
+  const content = (message as { content?: unknown }).content;
+  if (!Array.isArray(content)) {
+    return [];
+  }
+  const images: any[] = [];
+  for (const block of content) {
+    if (!block || typeof block !== "object") {
+      continue;
+    }
+    if ((block as { type?: unknown }).type !== "image") {
+      continue;
+    }
+    const b = block as { type: "image"; data: string; mimeType: string; fileName?: string };
+    if (b.data && b.mimeType) {
+      images.push({
+        type: b.type,
+        mimeType: b.mimeType,
+        fileName: b.fileName,
+        content: b.data,
+      });
+    }
+  }
+  return images;
+}

@@ -364,7 +364,9 @@ export async function runSubagentAnnounceFlow(params: {
   let didAnnounce = false;
   try {
     const requesterOrigin = normalizeDeliveryContext(params.requesterOrigin);
-    let reply = params.roundOneReply;
+    let reply: { text: string; attachments: any[] } | undefined = params.roundOneReply
+      ? { text: params.roundOneReply, attachments: [] }
+      : undefined;
     let outcome: SubagentRunOutcome | undefined = params.outcome;
     if (!reply && params.waitForCompletion !== false) {
       const waitMs = Math.min(params.timeoutMs, 60_000);
@@ -434,14 +436,17 @@ export async function runSubagentAnnounceFlow(params: {
 
     // Build instructional message for main agent
     const taskLabel = params.label || params.task || "background task";
+    const findingsBody = reply?.text || "(no output)";
     const triggerMessage = [
       `A background task "${taskLabel}" just ${statusLabel}.`,
       "",
       "Findings:",
-      reply || "(no output)",
+      findingsBody,
       "",
       statsLine,
-      "",
+    ].join("\n");
+
+    const extraSystemPrompt = [
       "Summarize this naturally for the user. Keep it brief (1-2 sentences). Flow it into the conversation naturally.",
       "Do not mention technical details like tokens, stats, or that this was a background task.",
       "You can respond with NO_REPLY if no announcement is needed (e.g., internal task with no user-facing result).",
@@ -473,6 +478,8 @@ export async function runSubagentAnnounceFlow(params: {
       params: {
         sessionKey: params.requesterSessionKey,
         message: triggerMessage,
+        extraSystemPrompt,
+        attachments: reply?.attachments,
         deliver: true,
         channel: directOrigin?.channel,
         accountId: directOrigin?.accountId,

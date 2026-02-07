@@ -2,19 +2,24 @@ import crypto from "node:crypto";
 import { callGateway } from "../../gateway/call.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
 import { AGENT_LANE_NESTED } from "../lanes.js";
-import { extractAssistantText, stripToolMessages } from "./sessions-helpers.js";
+import { extractAssistantAttachments, extractAssistantText, stripToolMessages } from "./sessions-helpers.js";
 
 export async function readLatestAssistantReply(params: {
   sessionKey: string;
   limit?: number;
-}): Promise<string | undefined> {
+}): Promise<{ text: string; attachments: any[] } | undefined> {
   const history = await callGateway<{ messages: Array<unknown> }>({
     method: "chat.history",
     params: { sessionKey: params.sessionKey, limit: params.limit ?? 50 },
   });
   const filtered = stripToolMessages(Array.isArray(history?.messages) ? history.messages : []);
   const last = filtered.length > 0 ? filtered[filtered.length - 1] : undefined;
-  return last ? extractAssistantText(last) : undefined;
+  if (!last) {
+    return undefined;
+  }
+  const text = extractAssistantText(last);
+  const attachments = extractAssistantAttachments(last);
+  return { text: text ?? "", attachments };
 }
 
 export async function runAgentStep(params: {
@@ -24,7 +29,7 @@ export async function runAgentStep(params: {
   timeoutMs: number;
   channel?: string;
   lane?: string;
-}): Promise<string | undefined> {
+}): Promise<{ text: string; attachments: any[] } | undefined> {
   const stepIdem = crypto.randomUUID();
   const response = await callGateway<{ runId?: string }>({
     method: "agent",
