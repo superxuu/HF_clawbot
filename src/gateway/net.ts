@@ -97,7 +97,8 @@ export function isIpInCidr(ip: string, cidr: string): boolean {
     if (bits === 0) {
       return true;
     }
-    const mask = (bits === 32 ? 0xffffffff : ~((1 << (32 - bits)) - 1)) >>> 0;
+    // Correctly calculate mask without signal issues
+    const mask = (0xffffffff << (32 - bits)) >>> 0;
     return (ipInt & mask) === (rangeInt & mask);
   } catch {
     return false;
