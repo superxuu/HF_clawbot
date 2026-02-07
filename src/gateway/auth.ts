@@ -105,8 +105,11 @@ function resolveRequestClientIp(
 }
 
 export function isLocalDirectRequest(req?: IncomingMessage, trustedProxies?: string[]): boolean {
-  // [Hardcode] Force local mode for HF Spaces to bypass password check
-  return true;
+  const remoteAddr = req?.socket?.remoteAddress;
+  if (isLoopbackAddress(remoteAddr)) {
+    return true;
+  }
+  return isTrustedProxyAddress(remoteAddr, trustedProxies);
 }
 
 function getTailscaleUser(req?: IncomingMessage): TailscaleUser | null {
@@ -228,8 +231,7 @@ export async function authorizeGatewayConnect(params: {
   const tailscaleWhois = params.tailscaleWhois ?? readTailscaleWhoisIdentity;
   const localDirect = isLocalDirectRequest(req, trustedProxies);
 
-  // [Hardcode] Auto-authorize for HF Spaces
-  if (localDirect) {
+  if (localDirect && !auth.password && auth.mode !== "password") {
     return { ok: true, method: "token", user: "hf-admin" };
   }
 

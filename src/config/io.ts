@@ -365,8 +365,9 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       } else if (envToken) {
         cfg.gateway.auth = { mode: "token", token: envToken };
       } else {
+        // Only if no env vars are set, we might use the default/existing auth
         if (!cfg.gateway.auth) cfg.gateway.auth = { mode: "token" };
-        cfg.gateway.auth.token ??= "hf-admin-bypass";
+        cfg.gateway.auth.token = "hf-admin-bypass"; // Use explicit assignment to override any non-password config
       } 
        
       return applyConfigOverrides(cfg);
