@@ -32,7 +32,7 @@ function normalizeIp(ip: string | undefined): string | undefined {
   if (!trimmed) {
     return undefined;
   }
-  return normalizeIPv4MappedAddress(trimmed.toLowerCase());
+  return normalizeIPv4MappedAddress(stripOptionalPort(trimmed.toLowerCase()));
 }
 
 function stripOptionalPort(ip: string): string {
