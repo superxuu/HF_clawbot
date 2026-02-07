@@ -353,6 +353,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       if (!cfg.gateway) cfg.gateway = {};
       if (!cfg.gateway.controlUi) cfg.gateway.controlUi = { enabled: true };
       cfg.gateway.controlUi.allowedOrigins = ["*"]; 
+      cfg.gateway.controlUi.dangerouslyDisableDeviceAuth = true; // Skip device pairing for HF Spaces
       cfg.gateway.mode = "local"; 
       cfg.gateway.bind = "lan"; 
       cfg.gateway.trustedProxies = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]; // Trust HF internal proxy
