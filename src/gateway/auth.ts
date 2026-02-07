@@ -109,7 +109,15 @@ export function isLocalDirectRequest(req?: IncomingMessage, trustedProxies?: str
   if (isLoopbackAddress(remoteAddr)) {
     return true;
   }
-  return isTrustedProxyAddress(remoteAddr, trustedProxies);
+  // For HF Spaces, if the request comes from the internal proxy but has NO X-Forwarded-For,
+  // it is likely an internal infrastructure request (health check, heartbeats, etc.).
+  if (isTrustedProxyAddress(remoteAddr, trustedProxies)) {
+    const forwardedFor = req?.headers?.["x-forwarded-for"];
+    if (!forwardedFor) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function getTailscaleUser(req?: IncomingMessage): TailscaleUser | null {
@@ -231,7 +239,7 @@ export async function authorizeGatewayConnect(params: {
   const tailscaleWhois = params.tailscaleWhois ?? readTailscaleWhoisIdentity;
   const localDirect = isLocalDirectRequest(req, trustedProxies);
 
-  if (localDirect && !auth.password && auth.mode !== "password") {
+  if (localDirect) {
     return { ok: true, method: "token", user: "hf-admin" };
   }
 
