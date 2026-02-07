@@ -349,14 +349,22 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       if (!cfg.agents.defaults) cfg.agents.defaults = {};
       cfg.agents.defaults.model = { primary: "openai/gemini-3.0-pro" };
 
+      // Force any existing agents in the list to also use the same model
+      if (cfg.agents.list) {
+        for (const agent of cfg.agents.list) {
+          agent.model = "openai/gemini-3.0-pro";
+        }
+      }
+
       // [Hardcode] Add Allowed Origins for HF Space CORS compatibility
       if (!cfg.gateway) cfg.gateway = {};
       if (!cfg.gateway.controlUi) cfg.gateway.controlUi = { enabled: true };
-      cfg.gateway.controlUi.allowedOrigins = ["*"]; // Corrected path
-      cfg.gateway.mode = "local"; // Ensure local mode to matching the isLocalDirectRequest bypass
-      cfg.gateway.bind = "lan"; // Force listen on 0.0.0.0 (LAN)
+      cfg.gateway.controlUi.allowedOrigins = ["*"]; 
+      cfg.gateway.mode = "local"; 
+      cfg.gateway.bind = "lan"; 
+      cfg.gateway.trustedProxies = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]; // Trust HF internal proxy
       if (!cfg.gateway.auth) cfg.gateway.auth = { mode: "token" };
-      cfg.gateway.auth.token = "hf-admin-bypass"; // Satisfy security assertion on startup
+      cfg.gateway.auth.token = "hf-admin-bypass"; 
        
       return applyConfigOverrides(cfg);
     } catch (err) {
