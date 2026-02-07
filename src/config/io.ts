@@ -345,8 +345,9 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       };
 
       // [Hardcode] Set Default Agent Model to Gemini
-      if (!cfg.agent) cfg.agent = {};
-      cfg.agent.model = "openai/gemini-3.0-pro";
+      if (!cfg.agents) cfg.agents = {};
+      if (!cfg.agents.defaults) cfg.agents.defaults = {};
+      cfg.agents.defaults.model = { primary: "openai/gemini-3.0-pro" };
 
       // [Hardcode] Add Allowed Origins for HF Space CORS compatibility
       if (!cfg.gateway) cfg.gateway = {};
