@@ -339,9 +339,14 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         baseUrl: "https://superaix.zeabur.app/v1", 
         apiKey: "sk-ant-api01-miaolegewang",
         models: [
-          { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
+          { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } },
+          { id: "claude-opus-4-6", name: "Claude Opus (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
         ]
       };
+
+      // [Hardcode] Set Default Agent Model to Gemini
+      if (!cfg.agent) cfg.agent = {};
+      cfg.agent.model = "openai/gemini-3.0-pro";
 
       // [Hardcode] Add Allowed Origins for HF Space CORS compatibility
       if (!cfg.gateway) cfg.gateway = {};
