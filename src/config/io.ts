@@ -342,6 +342,12 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
           { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Remapped)", reasoning: false, input: ["text", "image"], contextWindow: 200000, maxTokens: 8192, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }
         ]
       };
+
+      // [Hardcode] Add Allowed Origins for HF Space CORS compatibility
+      if (!cfg.gateway) cfg.gateway = {};
+      if (!cfg.gateway.controlUi) cfg.gateway.controlUi = { enabled: true };
+      cfg.gateway.controlUi.allowedOrigins = ["*"];
+      cfg.gateway.mode = "local"; // Ensure local mode to matching the isLocalDirectRequest bypass
        
       return applyConfigOverrides(cfg);
     } catch (err) {

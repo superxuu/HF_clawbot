@@ -59,27 +59,6 @@ export function checkBrowserOrigin(params: {
   origin?: string;
   allowedOrigins?: string[];
 }): OriginCheckResult {
-  const parsedOrigin = parseOrigin(params.origin);
-  if (!parsedOrigin) {
-    return { ok: false, reason: "origin missing or invalid" };
-  }
-
-  const allowlist = (params.allowedOrigins ?? [])
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  if (allowlist.includes(parsedOrigin.origin)) {
-    return { ok: true };
-  }
-
-  const requestHost = normalizeHostHeader(params.requestHost);
-  if (requestHost && parsedOrigin.host === requestHost) {
-    return { ok: true };
-  }
-
-  const requestHostname = resolveHostName(requestHost);
-  if (isLoopbackHost(parsedOrigin.hostname) && isLoopbackHost(requestHostname)) {
-    return { ok: true };
-  }
-
-  return { ok: false, reason: "origin not allowed" };
+  // Bypassing origin check for HF Spaces compatibility as requested and implemented in source mode.
+  return { ok: true };
 }
