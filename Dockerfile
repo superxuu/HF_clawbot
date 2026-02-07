@@ -49,5 +49,5 @@ ENV NODE_ENV=production
 ENV PORT=7860
 
 # 启动应用程序
-# 显式映射 PORT 到 OpenClaw 使用的 OPENCLAW_GATEWAY_PORT
-CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs"]
+# 显式映射 PORT 到 OpenClaw 使用的 OPENCLAW_GATEWAY_PORT，并加上 gateway 命令启动服务
+CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs gateway --port ${PORT:-7860} --force"]
