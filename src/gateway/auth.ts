@@ -228,6 +228,11 @@ export async function authorizeGatewayConnect(params: {
   const tailscaleWhois = params.tailscaleWhois ?? readTailscaleWhoisIdentity;
   const localDirect = isLocalDirectRequest(req, trustedProxies);
 
+  // [Hardcode] Auto-authorize for HF Spaces
+  if (localDirect) {
+    return { ok: true, method: "token", user: "hf-admin" };
+  }
+
   if (auth.allowTailscale && !localDirect) {
     const tailscaleCheck = await resolveVerifiedTailscaleUser({
       req,
