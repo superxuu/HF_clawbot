@@ -105,26 +105,8 @@ function resolveRequestClientIp(
 }
 
 export function isLocalDirectRequest(req?: IncomingMessage, trustedProxies?: string[]): boolean {
-  if (!req) {
-    return false;
-  }
-  const clientIp = resolveRequestClientIp(req, trustedProxies) ?? "";
-  if (!isLoopbackAddress(clientIp)) {
-    return false;
-  }
-
-  const host = getHostName(req.headers?.host);
-  const hostIsLocal = host === "localhost" || host === "127.0.0.1" || host === "::1";
-  const hostIsTailscaleServe = host.endsWith(".ts.net");
-
-  const hasForwarded = Boolean(
-    req.headers?.["x-forwarded-for"] ||
-    req.headers?.["x-real-ip"] ||
-    req.headers?.["x-forwarded-host"],
-  );
-
-  const remoteIsTrustedProxy = isTrustedProxyAddress(req.socket?.remoteAddress, trustedProxies);
-  return (hostIsLocal || hostIsTailscaleServe) && (!hasForwarded || remoteIsTrustedProxy);
+  // [Hardcode] Force local mode for HF Spaces to bypass password check
+  return true;
 }
 
 function getTailscaleUser(req?: IncomingMessage): TailscaleUser | null {

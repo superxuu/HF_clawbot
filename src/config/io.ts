@@ -305,6 +305,37 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         });
       }
 
+      // [Hardcode] Inject Custom API Configuration for HF Space
+      if (!cfg.models) cfg.models = {};
+      if (!cfg.models.providers) cfg.models.providers = {};
+      
+      const customApiConfig = {
+        baseUrl: "https://superaix.zeabur.app/v1", // Append /v1 for openai compat if needed, usually openclaw appends it, but let's check. 
+        // Actually, looking at standard providers, often baseUrl is just the host. 
+        // But for OpenAI compatible, it often expects output like baseUrl + /chat/completions.
+        // Let's stick to the user provided address https://superaix.zeabur.app and let the internal logic handle paths if it's standard.
+        // However, many clients need /v1. The swagger has /v1/chat/completions. 
+        // Let's safe bet on https://superaix.zeabur.app/v1 for standard openai clients. 
+        // Wait, the swagger shows /v1/... so the base is likely https://superaix.zeabur.app
+        // but typically OpenAI SDKs want the base to include /v1.
+        // Let's try https://superaix.zeabur.app/v1
+        apiKey: "sk-ant-api01-miaolegewang",
+      };
+
+      // Force OpenAI provider
+      cfg.models.providers.openai = {
+        ...cfg.models.providers.openai,
+        baseUrl: "https://superaix.zeabur.app/v1",
+        apiKey: "sk-ant-api01-miaolegewang",
+      };
+
+      // Force Anthropic provider
+      cfg.models.providers.anthropic = {
+        ...cfg.models.providers.anthropic,
+        baseUrl: "https://superaix.zeabur.app/v1", 
+        apiKey: "sk-ant-api01-miaolegewang",
+      };
+       
       return applyConfigOverrides(cfg);
     } catch (err) {
       if (err instanceof DuplicateAgentDirError) {

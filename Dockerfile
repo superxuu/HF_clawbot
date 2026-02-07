@@ -1,48 +1,47 @@
-FROM node:22-bookworm
+# Use Node.js 22 as the base image
+FROM node:22-bullseye
 
-# Install Bun (required for build scripts)
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
+# Install corepack for pnpm support
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-RUN corepack enable
-
+# Set working directory
 WORKDIR /app
 
-ARG OPENCLAW_DOCKER_APT_PACKAGES=""
-RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
-      apt-get update && \
-      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $OPENCLAW_DOCKER_APT_PACKAGES && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
-    fi
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-COPY ui/package.json ./ui/package.json
+# Copy dependency definitions
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy patches if they exist (ignoring if not present effectively, but COPY fails if not found unless we use wildcard)
+# We know patches dir exists from `list_dir`
 COPY patches ./patches
-COPY scripts ./scripts
 
+# Install dependencies (frozen lockfile for reproducibility)
 RUN pnpm install --frozen-lockfile
 
+# Copy the rest of the application source code
 COPY . .
-RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build
-# Force pnpm for UI build (Bun may fail on ARM/Synology architectures)
-ENV OPENCLAW_PREFER_PNPM=1
+
+# Build the project
+# This includes compiling TypeScript and other assets
+RUN pnpm build
+
+# Build the UI
+# This ensures the frontend assets are available
 RUN pnpm ui:build
 
-ENV NODE_ENV=production
-
-# Allow non-root user to write temp files during runtime/tests.
+# Fix permissions for the node user
 RUN chown -R node:node /app
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
+# Switch to non-root user for security
 USER node
 
-# Start gateway server with default config.
-# Binds to loopback (127.0.0.1) by default for security.
-#
-# For container platforms requiring external health checks:
-#   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","openclaw.mjs","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
+# Expose the port (7860 is standard for HF Spaces)
+EXPOSE 7860
+
+# Set environment variables
+ENV NODE_ENV=production
+# Default port if not provided by HF
+ENV PORT=7860
+
+# Start the application
+# We use shell form to ensure the PORT environment variable is correctly mapped 
+# to OPENCLAW_GATEWAY_PORT, which the application uses.
+CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs"]
