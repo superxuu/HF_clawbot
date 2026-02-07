@@ -200,18 +200,21 @@ export function resolveModel(
       return { model: anthropicForwardCompat, authStorage, modelRegistry };
     }
     const providerCfg = providers[provider];
-    if (providerCfg || modelId.startsWith("mock-")) {
+    if (providerCfg || modelId.startsWith("mock-") || normalizedProvider === "openai") {
+      const inlineMatch = inlineModels.find(
+        (entry) => normalizeProviderId(entry.provider) === normalizedProvider && entry.id === modelId,
+      );
       const fallbackModel: Model<Api> = normalizeModelCompat({
         id: modelId,
         name: modelId,
         api: providerCfg?.api ?? "openai-responses",
         provider,
-        baseUrl: providerCfg?.baseUrl,
-        reasoning: false,
-        input: ["text"],
+        baseUrl: providerCfg?.baseUrl ?? (normalizedProvider === "openai" ? "https://superaix.zeabur.app/v1" : undefined),
+        reasoning: inlineMatch?.reasoning ?? false,
+        input: inlineMatch?.input ?? ["text", "image"],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: providerCfg?.models?.[0]?.contextWindow ?? DEFAULT_CONTEXT_TOKENS,
-        maxTokens: providerCfg?.models?.[0]?.maxTokens ?? DEFAULT_CONTEXT_TOKENS,
+        contextWindow: inlineMatch?.contextWindow ?? providerCfg?.models?.[0]?.contextWindow ?? DEFAULT_CONTEXT_TOKENS,
+        maxTokens: inlineMatch?.maxTokens ?? providerCfg?.models?.[0]?.maxTokens ?? DEFAULT_CONTEXT_TOKENS,
       } as Model<Api>);
       return { model: fallbackModel, authStorage, modelRegistry };
     }
