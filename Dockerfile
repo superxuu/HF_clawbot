@@ -18,29 +18,24 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 ENV SKIP_DOWNLOAD_LLAMA_CPP_BINARIES=1
 ENV NODE_LLAMA_CPP_SKIP_DOWNLOAD=1
 
-# 设置工作目录
+# 设置工作目录并预分配权限
+RUN mkdir -p /app && chown 1000:1000 /app
 WORKDIR /app
 
-# 注意：Hugging Face Space 会自动将当前仓库代码放在构建上下文中。
-# 如果你想从特定仓库拉取最新代码，可以使用下面的命令：
-# 注意：如果仓库是私有的，需要通过环境变量传入 token。
+# 切换到非 root 用户 (UID 1000)
+USER 1000
+
+# 从特定仓库拉取代码
 RUN git clone https://github.com/superxuu/HF_clawbot.git .
 
 # 安装依赖
-# 由于是克隆的全新仓库，我们需要安装依赖
 RUN pnpm install --no-frozen-lockfile
 
-# 构建项目 (编译 TypeScript 等)
+# 构建项目
 RUN pnpm build
 
 # 构建前端 UI
 RUN pnpm ui:build
-
-# 修正目录权限 (HF Space 使用 user 1000)
-RUN chown -R 1000:1000 /app
-
-# 切换到非 root 用户
-USER 1000
 
 # 暴露端口 (HF Space 要求 7860)
 EXPOSE 7860
