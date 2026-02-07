@@ -1,11 +1,18 @@
-# 使用 Node.js 22 作为基础镜像
-FROM node:22-bullseye
-
-# 安装必要的系统工具 (git, openssh)
-RUN apt-get update && apt-get install -y git openssh-client && rm -rf /var/lib/apt/lists/*
+# 安装必要的系统工具 (git, cmake, python3, 编译工具)
+RUN apt-get update && apt-get install -y \
+    git \
+    cmake \
+    python3 \
+    build-essential \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # 启用核心包管理 (pnpm)
 RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# 设置构建环境变量，尝试跳过不必要的原生模块重新编译 (如果支持)
+ENV SKIP_DOWNLOAD_LLAMA_CPP_BINARIES=1
+ENV NODE_LLAMA_CPP_SKIP_DOWNLOAD=1
 
 # 设置工作目录
 WORKDIR /app
