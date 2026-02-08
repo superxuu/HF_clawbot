@@ -46,8 +46,10 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 # 3. 环境变量 (自适应 Python 路径，去除硬编码版本号)
 # - DISPLAY=:99 配合 xvfb 使用，为浏览器提供虚拟屏幕，解决 X11 Missing 问题
+# - XDG_RUNTIME_DIR 消除 Chrome 启动时的目录缺失警告
 ENV TZ=Asia/Shanghai \
     DISPLAY=:99 \
+    XDG_RUNTIME_DIR=/tmp/runtime-openclaw \
     SKIP_DOWNLOAD_LLAMA_CPP_BINARIES=1 \
     NODE_LLAMA_CPP_SKIP_DOWNLOAD=1 \
     PYTHONUSERBASE=/app/.local \
