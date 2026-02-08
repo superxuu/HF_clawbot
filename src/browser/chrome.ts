@@ -204,7 +204,9 @@ export async function launchOpenClawChrome(
     if (resolved.headless) {
       // Best-effort; older Chromes may ignore.
       args.push("--headless=new");
+      args.push("--headless"); // Redundant but safer for some environments
       args.push("--disable-gpu");
+      args.push("--disable-software-rasterizer"); // Avoid X11 dependency during software rendering
     }
     if (resolved.noSandbox) {
       args.push("--no-sandbox");

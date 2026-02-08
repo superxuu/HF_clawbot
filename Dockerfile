@@ -38,13 +38,16 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     fonts-liberation \
     fonts-noto-color-emoji \
     libxss1 \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. 锁定 pnpm 版本确保构建一致性
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 # 3. 环境变量 (自适应 Python 路径，去除硬编码版本号)
+# - DISPLAY=:99 配合 xvfb 使用，为浏览器提供虚拟屏幕，解决 X11 Missing 问题
 ENV TZ=Asia/Shanghai \
+    DISPLAY=:99 \
     SKIP_DOWNLOAD_LLAMA_CPP_BINARIES=1 \
     NODE_LLAMA_CPP_SKIP_DOWNLOAD=1 \
     PYTHONUSERBASE=/app/.local \
