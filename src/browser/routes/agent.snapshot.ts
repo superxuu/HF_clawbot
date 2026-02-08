@@ -32,7 +32,13 @@ export function registerBrowserAgentSnapshotRoutes(
       return;
     }
     const body = readBody(req);
-    const url = toStringOrEmpty(body.url);
+    let url = toStringOrEmpty(body.url);
+    // Sanitization: remove markdown link wrapper if present (e.g. [url](http://...))
+    const mdMatch = url.match(/\]\((https?:\/\/[^)]+)\)/);
+    if (mdMatch) {
+      url = mdMatch[1];
+    }
+    url = url.trim();
     const targetId = toStringOrEmpty(body.targetId) || undefined;
     if (!url) {
       return jsonError(res, 400, "url is required");

@@ -87,14 +87,19 @@ export async function fetchBrowserJson<T>(
       body,
     });
 
-    const result = await (timeoutMs
-      ? Promise.race([
-          dispatchPromise,
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("timed out")), timeoutMs),
-          ),
-        ])
-      : dispatchPromise);
+    let result;
+    try {
+      result = await (timeoutMs
+        ? Promise.race([
+            dispatchPromise,
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error("timed out")), timeoutMs),
+            ),
+          ])
+        : dispatchPromise);
+    } catch (err) {
+      throw enhanceBrowserFetchError(url, err, timeoutMs);
+    }
 
     if (result.status >= 400) {
       const message =
@@ -105,6 +110,11 @@ export async function fetchBrowserJson<T>(
     }
     return result.body as T;
   } catch (err) {
-    throw enhanceBrowserFetchError(url, err, timeoutMs);
+    // If the error was already enhanced (from the inner catch), rethrow it.
+    // Otherwise, it's a business logic error (status >= 400) which we should just pass through.
+    if (err instanceof Error && err.message.startsWith("Can't reach")) {
+      throw err;
+    }
+    throw err;
   }
 }
