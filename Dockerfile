@@ -54,14 +54,16 @@ ENV TZ=Asia/Shanghai \
     PATH="/app/.local/bin:${PATH}"
 
 # 4. 目录预设与权限 (使用 node 用户对齐标准 Shell 环境)
-RUN mkdir -p /app /app/.openclaw /home/node/.ssh && \
+RUN mkdir -p /home/node/.ssh && \
     chmod 700 /home/node/.ssh && \
-    chown -R node:node /app /home/node
+    chown -R node:node /home/node
 
 WORKDIR /app
 
 # 5. 代码拉取及权限同步
-RUN git clone https://github.com/superxuu/HF_clawbot.git /app && \
+# 采用克隆到当前目录的方式，随后创建数据重定向目录并赋权
+RUN git clone https://github.com/superxuu/HF_clawbot.git . && \
+    mkdir -p /app/.openclaw && \
     chown -R node:node /app
 
 # 切换到非 root 用户 (node)
@@ -70,10 +72,11 @@ USER node
 # 6. 使用 --user 安装以确保 AI 运行时路径兼容
 RUN pip3 install --no-cache-dir --user paramiko fabric
 
-# 7. 构建流程
-RUN pnpm install --no-frozen-lockfile && pnpm store prune && \
-    pnpm build && \
-    pnpm ui:build
+# 7. 构建流程 (分步执行以便于日志定位)
+RUN pnpm install --no-frozen-lockfile
+RUN pnpm store prune
+RUN pnpm build
+RUN pnpm ui:build
 
 EXPOSE 7860
 ENV NODE_ENV=production PORT=7860
