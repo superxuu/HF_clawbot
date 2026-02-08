@@ -565,9 +565,11 @@ export async function createPageViaPlaywright(opts: { cdpUrl: string; url: strin
   // Navigate to the URL
   const targetUrl = opts.url.trim() || "about:blank";
   if (targetUrl !== "about:blank") {
-    await page.goto(targetUrl, { timeout: 30_000 }).catch(() => {
-      // Navigation might fail for some URLs, but page is still created
-    });
+    await page
+      .goto(targetUrl, { timeout: 30_000, waitUntil: "domcontentloaded" })
+      .catch(() => {
+        // Navigation might fail for some URLs, but page is still created
+      });
   }
 
   // Get the targetId for this page
