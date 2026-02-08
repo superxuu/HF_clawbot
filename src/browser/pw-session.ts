@@ -453,13 +453,13 @@ export async function getPageForTargetId(opts: {
     // Extension relays can block CDP attachment APIs (e.g. Target.attachToBrowserTarget),
     // which prevents us from resolving a page's targetId via newCDPSession(). If Playwright
     // only exposes a single Page, use it as a best-effort fallback.
-    if (pages.length === 1) {
-      return first;
-    }
-    throw new Error("tab not found");
+    // Even with multiple pages, auto-fallback to the first page improves agent resilience
+    // when operating with stale or expired targetIds from previous sessions.
+    return first;
   }
   return found;
 }
+
 
 export function refLocator(page: Page, ref: string) {
   const normalized = ref.startsWith("@")
