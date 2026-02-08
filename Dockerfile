@@ -77,9 +77,15 @@ RUN pnpm install --no-frozen-lockfile
 RUN pnpm store prune
 RUN pnpm build
 RUN pnpm ui:build
+# 关键：下载 Chromium 二进制内核，这是智能体联网浏览的“硬件”基础
+RUN pnpm exec playwright install chromium
 
 EXPOSE 7860
-ENV NODE_ENV=production PORT=7860
+# 关键环境变量：强制重定向浏览器服务到本地容器后端，并设置端口
+ENV NODE_ENV=production \
+    PORT=7860 \
+    OPENCLAW_BROWSER_SERVICE_URL="http://127.0.0.1:7860"
 
 # 8. 启动
-CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs gateway --port ${PORT:-7860} --force --allow-unconfigured"]
+# 关键启动参数：追加 --no-sandbox 以穿透容器权限限制，防止浏览器崩溃
+CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs gateway --port ${PORT:-7860} --force --allow-unconfigured --no-sandbox"]

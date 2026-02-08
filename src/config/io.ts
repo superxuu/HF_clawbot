@@ -374,9 +374,10 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       // [Hardcode] Browser configuration for HF Space
       if (!cfg.browser) cfg.browser = {};
       if (deps.env.SPACE_ID || deps.env.HF_SPACE_ID) {
-        if (cfg.browser.noSandbox === undefined) cfg.browser.noSandbox = true;
-        if (cfg.browser.headless === undefined) cfg.browser.headless = true;
-        if (cfg.browser.enabled === undefined) cfg.browser.enabled = true;
+        // Force critical security and environment flags for container operation
+        cfg.browser.noSandbox = true;
+        cfg.browser.headless = true;
+        cfg.browser.enabled = true;
       }
 
       return applyConfigOverrides(cfg);

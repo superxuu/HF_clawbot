@@ -277,13 +277,19 @@ export async function launchOpenClawChrome(
   }
 
   const proc = spawnOnce();
+  
+  // Track process output for debugging in restricted environments
+  proc.stdout.on("data", (data) => log.debug(`Chrome stdout: ${data}`));
+  proc.stderr.on("data", (data) => log.warn(`Chrome stderr: ${data}`));
+
   // Wait for CDP to come up.
-  const readyDeadline = Date.now() + 15_000;
+  // Increased deadline for HF container environments
+  const readyDeadline = Date.now() + 30_000;
   while (Date.now() < readyDeadline) {
-    if (await isChromeReachable(profile.cdpUrl, 500)) {
+    if (await isChromeReachable(profile.cdpUrl, 1000)) {
       break;
     }
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 500));
   }
 
   if (!(await isChromeReachable(profile.cdpUrl, 500))) {
