@@ -112,7 +112,7 @@ export async function browserNavigate(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url: opts.url, targetId: opts.targetId }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -136,7 +136,7 @@ export async function browserArmDialog(
       targetId: opts.targetId,
       timeoutMs: opts.timeoutMs,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -164,7 +164,7 @@ export async function browserArmFileChooser(
       targetId: opts.targetId,
       timeoutMs: opts.timeoutMs,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -190,7 +190,7 @@ export async function browserWaitForDownload(
       path: opts.path,
       timeoutMs: opts.timeoutMs,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -218,7 +218,7 @@ export async function browserDownload(
       path: opts.path,
       timeoutMs: opts.timeoutMs,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -232,7 +232,7 @@ export async function browserAct(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -258,6 +258,6 @@ export async function browserScreenshotAction(
       element: opts.element,
       type: opts.type,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }

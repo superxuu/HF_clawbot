@@ -49,7 +49,7 @@ export async function browserPdfSave(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ targetId: opts.targetId }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -125,7 +125,7 @@ export async function browserTraceStart(
       snapshots: opts.snapshots,
       sources: opts.sources,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -138,7 +138,7 @@ export async function browserTraceStop(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ targetId: opts.targetId, path: opts.path }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -151,7 +151,7 @@ export async function browserHighlight(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ targetId: opts.targetId, ref: opts.ref }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
@@ -195,6 +195,6 @@ export async function browserResponseBody(
       timeoutMs: opts.timeoutMs,
       maxChars: opts.maxChars,
     }),
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }

@@ -104,7 +104,7 @@ export async function browserStatus(
 ): Promise<BrowserStatus> {
   const q = buildProfileQuery(opts?.profile);
   return await fetchBrowserJson<BrowserStatus>(withBaseUrl(baseUrl, `/${q}`), {
-    timeoutMs: 1500,
+    timeoutMs: 5000,
   });
 }
 
@@ -122,7 +122,7 @@ export async function browserStart(baseUrl?: string, opts?: { profile?: string }
   const q = buildProfileQuery(opts?.profile);
   await fetchBrowserJson(withBaseUrl(baseUrl, `/start${q}`), {
     method: "POST",
-    timeoutMs: 15000,
+    timeoutMs: 60000,
   });
 }
 
@@ -130,7 +130,7 @@ export async function browserStop(baseUrl?: string, opts?: { profile?: string })
   const q = buildProfileQuery(opts?.profile);
   await fetchBrowserJson(withBaseUrl(baseUrl, `/stop${q}`), {
     method: "POST",
-    timeoutMs: 15000,
+    timeoutMs: 60000,
   });
 }
 
@@ -143,7 +143,7 @@ export async function browserResetProfile(
     withBaseUrl(baseUrl, `/reset-profile${q}`),
     {
       method: "POST",
-      timeoutMs: 20000,
+      timeoutMs: 60000,
     },
   );
 }
@@ -177,7 +177,7 @@ export async function browserCreateProfile(
         cdpUrl: opts.cdpUrl,
         driver: opts.driver,
       }),
-      timeoutMs: 10000,
+      timeoutMs: 30000,
     },
   );
 }
@@ -196,7 +196,7 @@ export async function browserDeleteProfile(
     withBaseUrl(baseUrl, `/profiles/${encodeURIComponent(profile)}`),
     {
       method: "DELETE",
-      timeoutMs: 20000,
+      timeoutMs: 60000,
     },
   );
 }
@@ -223,7 +223,7 @@ export async function browserOpenTab(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
-    timeoutMs: 15000,
+    timeoutMs: 60000,
   });
 }
 
@@ -330,7 +330,7 @@ export async function browserSnapshot(
     q.set("profile", opts.profile);
   }
   return await fetchBrowserJson<SnapshotResult>(withBaseUrl(baseUrl, `/snapshot?${q.toString()}`), {
-    timeoutMs: 20000,
+    timeoutMs: 60000,
   });
 }
 
