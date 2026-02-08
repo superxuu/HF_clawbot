@@ -378,6 +378,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         cfg.browser.noSandbox = true;
         cfg.browser.headless = true;
         cfg.browser.enabled = true;
+        cfg.browser.defaultProfile = "openclaw"; // Ensure local driver by default in HF
       }
 
       return applyConfigOverrides(cfg);

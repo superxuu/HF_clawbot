@@ -197,16 +197,34 @@ export function resolveBrowserConfig(
   const defaultProfileFromConfig = cfg?.defaultProfile?.trim() || undefined;
   // Use legacy cdpUrl port for backward compatibility when no profiles configured
   const legacyCdpPort = rawCdpUrl ? cdpInfo.port : undefined;
-  const profiles = ensureDefaultChromeExtensionProfile(
+  let profiles = ensureDefaultChromeExtensionProfile(
     ensureDefaultProfile(cfg?.profiles, defaultColor, legacyCdpPort, derivedCdpRange.start),
     controlPort,
   );
+
+  // [Hardcode] Force local driver for HF Space environments
+  if (process.env.SPACE_ID || process.env.HF_SPACE_ID) {
+    for (const name in profiles) {
+      const p = profiles[name];
+      if (p.driver === "extension" || name === "chrome") {
+        p.driver = "openclaw";
+      }
+    }
+  }
+
   const cdpProtocol = cdpInfo.parsed.protocol === "https:" ? "https" : "http";
-  const defaultProfile =
+  let defaultProfile =
     defaultProfileFromConfig ??
     (profiles[DEFAULT_BROWSER_DEFAULT_PROFILE_NAME]
       ? DEFAULT_BROWSER_DEFAULT_PROFILE_NAME
       : DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME);
+
+  // [Hardcode] Prefer "openclaw" profile in HF Space since "chrome" usually implies extension
+  if ((process.env.SPACE_ID || process.env.HF_SPACE_ID) && !defaultProfileFromConfig) {
+    if (profiles[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]) {
+      defaultProfile = DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME;
+    }
+  }
 
   return {
     enabled,
