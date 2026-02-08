@@ -82,5 +82,5 @@ EXPOSE 7860
 # 关键环境变量：设置生产环境与端口
 ENV NODE_ENV=production PORT=7860
 
-# 8. 启动 (依靠代码级 [io.ts] 对 HF 环境的检测自动挂载 --no-sandbox)
-CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; node scripts/run-node.mjs gateway --port ${PORT:-7860} --force --allow-unconfigured"]
+# 8. 启动 (使用 xvfb-run 包装启动，为浏览器提供活动的虚拟 X Server 环境)
+CMD ["sh", "-c", "export OPENCLAW_GATEWAY_PORT=${PORT:-7860}; xvfb-run -a node scripts/run-node.mjs gateway --port ${PORT:-7860} --force --allow-unconfigured"]
