@@ -77,8 +77,8 @@ RUN pnpm install --no-frozen-lockfile
 RUN pnpm store prune
 RUN pnpm build
 RUN pnpm ui:build
-# 关键：下载 Chromium 二进制内核，这是智能体联网浏览的“硬件”基础
-RUN pnpm exec playwright install chromium
+# 关键：修正安装指令。项目中依赖的是 playwright-core
+RUN pnpm exec playwright-core install chromium
 
 EXPOSE 7860
 # 关键环境变量：强制重定向浏览器服务到本地容器后端，并设置端口
