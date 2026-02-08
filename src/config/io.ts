@@ -379,6 +379,9 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         cfg.browser.headless = true;
         cfg.browser.enabled = true;
         cfg.browser.defaultProfile = "openclaw"; // Ensure local driver by default in HF
+        // [Hardcode] Massive timeout extension for HF container environments (slow disk/IO)
+        cfg.browser.remoteCdpTimeoutMs = 30000;
+        cfg.browser.remoteCdpHandshakeTimeoutMs = 60000;
       }
 
       return applyConfigOverrides(cfg);
