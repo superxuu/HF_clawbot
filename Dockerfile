@@ -2,7 +2,10 @@
 FROM node:22-bullseye
 
 # 1. 补全浏览器、SSH、时区及 Python 编译工具
-RUN apt-get update && apt-get install -y \
+# - DEBIAN_FRONTEND=noninteractive: 防止 tzdata 等安装时由于交互式提示挂起
+# - fonts-noto-color-emoji: 确保网页截图中的 Emoji 正常显示
+# - libxss1: 增强浏览器进程在某些组件下的兼容性
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     git \
     cmake \
     python3 \
@@ -13,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     openssh-client \
     tzdata \
-    # Chromium 依赖 (补全缺失项)
+    # Chromium 依赖
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -34,41 +37,40 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libgtk-3-0 \
     fonts-liberation \
+    fonts-noto-color-emoji \
+    libxss1 \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. 锁定 pnpm 版本
+# 2. 锁定 pnpm 版本确保构建一致性
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
-# 3. 环境变量 (修正 Python 为 3.9)
+# 3. 环境变量 (自适应 Python 路径，去除硬编码版本号)
+# - PYTHONUSERBASE 指定后，Python 会自动寻找其下的 site-packages
 ENV TZ=Asia/Shanghai \
     SKIP_DOWNLOAD_LLAMA_CPP_BINARIES=1 \
     NODE_LLAMA_CPP_SKIP_DOWNLOAD=1 \
     PYTHONUSERBASE=/app/.local \
     OPENCLAW_STATE_DIR=/app/.openclaw \
-    PATH="/app/.local/bin:${PATH}" \
-    PYTHONPATH="/app/.local/lib/python3.9/site-packages:${PYTHONPATH}"
+    PATH="/app/.local/bin:${PATH}"
 
-# 4. 目录预设与权限 (针对 HF 优化)
-# 显式初始化 SSH 目录并赋权，防止 SSH 运行时报错
-# 预创建 /app/.openclaw 以支持数据重定向
+# 4. 目录预设与权限 (使用 node 用户对齐标准 Shell 环境)
 RUN mkdir -p /app /app/.openclaw /home/node/.ssh && \
     chmod 700 /home/node/.ssh && \
     chown -R node:node /app /home/node
 
 WORKDIR /app
 
-# 5. 代码拉取
-# 克隆仓库并设置权限
+# 5. 代码拉取及权限同步
 RUN git clone https://github.com/superxuu/HF_clawbot.git /app && \
     chown -R node:node /app
 
+# 切换到非 root 用户 (node)
 USER node
 
-# 6. 使用 --user 安装，确保 AI 运行时可调用 (Paramiko/Fabric)
+# 6. 使用 --user 安装以确保 AI 运行时路径兼容
 RUN pip3 install --no-cache-dir --user paramiko fabric
 
-# 7. 构建
-# 安装依赖并清理缓存
+# 7. 构建流程
 RUN pnpm install --no-frozen-lockfile && pnpm store prune && \
     pnpm build && \
     pnpm ui:build
