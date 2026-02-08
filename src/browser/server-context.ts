@@ -49,7 +49,7 @@ function normalizeWsUrl(raw: string | undefined, cdpBaseUrl: string): string | u
   }
 }
 
-async function fetchJson<T>(url: string, timeoutMs = 1500, init?: RequestInit): Promise<T> {
+async function fetchJson<T>(url: string, timeoutMs = 5000, init?: RequestInit): Promise<T> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {

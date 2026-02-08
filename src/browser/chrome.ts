@@ -208,6 +208,7 @@ export async function launchOpenClawChrome(
       args.push("--disable-gpu");
       args.push("--disable-software-rasterizer"); // Avoid X11 dependency during software rendering
       args.push("--ozone-platform=headless"); // Force headless ozone platform to avoid X11 probe
+      args.push("--disable-dev-shm-usage"); // Crucial for containers with limited /dev/shm
     }
     if (resolved.noSandbox) {
       args.push("--no-sandbox");
