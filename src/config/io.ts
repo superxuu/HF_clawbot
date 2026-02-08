@@ -371,6 +371,14 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         cfg.gateway.auth.token = "hf-admin-bypass"; // Use explicit assignment to override any non-password config
       } 
        
+      // [Hardcode] Browser configuration for HF Space
+      if (!cfg.browser) cfg.browser = {};
+      if (deps.env.SPACE_ID || deps.env.HF_SPACE_ID) {
+        if (cfg.browser.noSandbox === undefined) cfg.browser.noSandbox = true;
+        if (cfg.browser.headless === undefined) cfg.browser.headless = true;
+        if (cfg.browser.enabled === undefined) cfg.browser.enabled = true;
+      }
+
       return applyConfigOverrides(cfg);
     } catch (err) {
       if (err instanceof DuplicateAgentDirError) {
